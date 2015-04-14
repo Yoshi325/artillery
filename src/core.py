@@ -14,6 +14,7 @@ import subprocess
 import urllib
 import urllib2
 import os
+import platform
 import time
 import shutil
 import logging
@@ -189,7 +190,11 @@ def is_posix():
     return os.name == "posix"
 
 def is_windows():
-    return os.name == "nt"
+    # text from: http://stackoverflow.com/a/11674977
+    # sys.platform is specified as a compiler define during the build configuration.
+    # os.name checks whether certain os specific modules are available (e.g. posix, nt, ...)
+    # platform.system() actually runs uname and potentially several other functions to determine the system type at run time.
+    return ((os.name == "nt") || (platform.system() == "Windows")
 
 def create_iptables_subset():
     if is_posix():
@@ -214,7 +219,7 @@ def create_iptables_subset():
     for ip in banfile:
         if not ip.startswith("#"):
             if ip not in iptablesbanlist:
-		ip = ip.strip()
+        ip = ip.strip()
                 ban(ip) #subprocess.Popen("iptables -I ARTILLERY 1 -s %s -j DROP" % ip.strip(), shell=True).wait()
 
 # valid if IP address is legit
